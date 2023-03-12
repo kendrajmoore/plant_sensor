@@ -1,0 +1,89 @@
+#include <Arduino.h>
+#include <DHT.h>
+#include <HardwareSerial.h>
+#define Type DHT11
+int sensePin=2;
+DHT HT(sensePin,Type);
+float humidity;
+float tempC;
+float tempF;
+int setTime=500;
+int dt=1000;
+int pingPin = 7;
+int echoPin = 6;
+int wet = 595;
+int dry = 239;
+int lightPin = 1;
+
+
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  HT.begin();
+  delay(setTime);
+
+}
+
+//CONVERT 
+long microsecondsToInches(long microseconds) {
+  return microseconds / 74 / 2;
+  
+}
+
+long microsecondsToCentimeters(long microseconds) {
+  return microseconds / 29 / 2; 
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  //PROMIXITY
+  long duration, inches, cm;
+  pinMode(pingPin, OUTPUT);
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(10);
+  digitalWrite(pingPin, LOW);
+  pinMode(echoPin, INPUT);
+  duration = pulseIn(echoPin, HIGH);
+  inches = microsecondsToInches(duration);
+  cm = microsecondsToCentimeters(duration);
+
+  //HUMIDITY
+  humidity=HT.readHumidity();
+  tempC=HT.readTemperature();
+  tempF=HT.readTemperature(true);
+
+
+  //PRINT PROMIXITY
+  Serial.print(inches);
+  Serial.print("in, ");
+  Serial.print(cm);
+  Serial.print("cm");
+  Serial.println();
+  delay(dt);
+
+
+  //PRINT HUMIDITY
+  Serial.print("Humidity: ");
+  Serial.print(humidity);
+  Serial.print(" Temperature C ");
+  Serial.print(tempC);
+  Serial.print(" C ");
+  Serial.print(tempF);
+  Serial.print(" F ");
+  delay(dt);
+
+
+  int sensorVal = analogRead(A0);
+  int percentageHumidity = map(sensorVal, wet, dry, 100, 0);
+  Serial.print(percentageHumidity);
+  Serial.println("%");
+  delay(dt);
+
+  int value = analogRead(A1);
+  Serial.println(value);
+  delay(dt);
+
+
+
+}
